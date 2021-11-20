@@ -14,3 +14,4 @@
 
 //  Size of the visualization grid of area N*N;
 #define N 1000
+#define Tol 0.0001
