@@ -14,4 +14,5 @@
 
 //  Size of the visualization grid of area N*N;
 #define N 1000
+//  How close the guessed root given the point used as guest must be to the real root of the equation;
 #define Tol 0.0001

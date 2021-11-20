@@ -55,11 +55,11 @@ int main(int argc, char **argv) {
 
     for (int x = 0; x < N; x++) {
         for (int y = 0; y < N; y++) {
-            r = root_fun(1.0*x+1.0*y*I);
+            r = root_fun(1.0*x+1.0*y*I);                    //  Evaluate each point as an initial guess;
             for (int i = 0; i < sizeof(roots); i++) {
-                z = r - roots[i];
+                z = r - roots[i];                           //  Evaluate how close the point after N iterations of each root of the function;
                 if (creal(z) < Tol && cimag(z) < Tol) {
-                    color[x*N+y] = i+1;
+                    color[x*N+y] = i+1;                     //  Link the point to a given number which going to relate to a color;
                 };
             };
         };
