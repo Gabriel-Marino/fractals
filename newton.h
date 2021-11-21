@@ -1,6 +1,6 @@
 /**
  * Created when     :   2021.11.19;
- * Last Update      :   2021.11.19;
+ * Last Update      :   2021.11.21;
  * Author           :   G. Marino <gcmarino404@gmail.com>;
  * Notes            :   Header to the program Newton-main and correlated files.
  */

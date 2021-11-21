@@ -1,6 +1,6 @@
 /**
  * Created when     :   2021.10.21;
- * Last Update      :   2021.11.19;
+ * Last Update      :   2021.11.21;
  * Author           :   G. Marino <gcmarino404@gmail.com>;
  * Notes            :
  * Compilation      :   gcc -O3 src/newton-main.c -static -lgsl -lgslcblas -lm -o fractal.out
@@ -8,6 +8,12 @@
  */
 
 #include "../newton.h"
+
+//  Struct used to create arrays of complex numbers which ones are the roots of the studied equation;
+struct cmplx {
+    double real;    //  Real part of the given complex number;
+    double imag;    //  Imaginary part of the given complex number;
+};
 
 //  Output (op) function, print the results into .dat archives;
 void op(int *phi) {
@@ -27,7 +33,9 @@ void op(int *phi) {
 };
 
 //  roots = [1, -1, 0, i, -i];
-double _Complex *roots[] = (1.0+0.0*I, -1.0+0.0*I, 0.0+0.0*I, 0.0+1.0*I, 0.0-1.0*I);
+// double _Complex *roots[] = (1.0+0.0*I, -1.0+0.0*I, 0.0+0.0*I, 0.0+1.0*I, 0.0-1.0*I);
+
+struct cmplx *roots[5] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, 0.0}, {0.0, 1.0}, {0.0, -1.0}};
 double _Complex fun1 (double _Complex x) {return x*(x*x+1)*(x*x-1); };
 double _Complex dfun1(double _Complex x) {return 5*x*x*x*x-1; };
 
@@ -53,13 +61,24 @@ int main(int argc, char **argv) {
     double _Complex r, z;
     int *color = calloc(N*N, sizeof(int));
 
+    // for (int x = 0; x < N; x++) {
+    //     for (int y = 0; y < N; y++) {
+    //         r = root_fun(1.0*x+1.0*y*I);                    //  Evaluate each point as an initial guess;
+    //         for (int i = 0; i < sizeof(roots); i++) {
+    //             z = r - roots[i];                           //  Evaluate how close the point after N iterations of each root of the function;
+    //             if (creal(z) < Tol && cimag(z) < Tol) {
+    //                 color[x*N+y] = i+1;                     //  Link the point to a given number which going to relate to a color;
+    //             };
+    //         };
+    //     };
+    // };
+
     for (int x = 0; x < N; x++) {
         for (int y = 0; y < N; y++) {
-            r = root_fun(1.0*x+1.0*y*I);                    //  Evaluate each point as an initial guess;
+            r = root_fun(1.0*x+1.0*y*I);                                                    //  Evaluate each point as an initial guess;
             for (int i = 0; i < sizeof(roots); i++) {
-                z = r - roots[i];                           //  Evaluate how close the point after N iterations of each root of the function;
-                if (creal(z) < Tol && cimag(z) < Tol) {
-                    color[x*N+y] = i+1;                     //  Link the point to a given number which going to relate to a color;
+                if (creal(r) - roots[i].real) < Tol && (cimag(r) - roots[i].imag) < Tol) {   //  Evaluate how close the point after N iterations of each root of the function;
+                    color[x*N+y] = i+1;                                                     //  Link the point to a given number which going to relate to a color;
                 };
             };
         };
