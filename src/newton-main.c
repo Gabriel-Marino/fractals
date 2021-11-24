@@ -62,12 +62,16 @@ double _Complex dfun(double _Complex x, double *coefs) {
 };
 
 //  Inspired by Grant Sanderson, Grant uses same generalization in one of he's code.
-double _Complex roots(double _Complex r0, double *coefs) {
-    double _Complex r, rt = r0;
-    for (int i = 0; i < 1000; i++) {
+double _Complex find_root(double _Complex r0, double *coefs) {
+    double _Complex r = 1/Tol, rt = r0;
+    int i;
+
+    while ((cabs(r - rt) < Tol) || (i < 100)) {
         r = rt - fun(rt, coefs)/dfun(rt, coefs);
         rt = r;
+        i++;
     };
+
     return r;
 };
 
@@ -77,8 +81,23 @@ int main(int argc, char **argv) {
     int *color = calloc(N*N, sizeof(int));
     double *coefs = calloc(argc, sizeof(double));
 
+    struct cmplx *roots = calloc(argc, sizeof(struct cmplx));
+
+    gsl_rng_default_seed = time(NULL);
+    gsl_rng *rng = gsl_rng_alloc(gsl_rng_taus);
+
     for (int i = 1; i < argc; i++) {
         coefs[i-1] = atof(argv[i]);
+    };
+    for (int i = 0; i < argc; i++) {
+        double _Complex r = 2.0*gsl_rng_uniform(rng)*(1.0+1.0*I);
+        double _Complex z = find_root(r, coefs);
+        roots[i].real = creal(z);
+        roots[i].imag = cimag(z);
+    };
+
+    for (int i = 0; i < sizeof(roots); i++) {
+        printf("%e + %e\n", roots[i].real, roots[i].imag);
     };
 
     // for (int x = 0; x < N; x++) {
@@ -107,6 +126,7 @@ int main(int argc, char **argv) {
     op(color);
 
     free(color);
+    gsl_rng_free(rng);
 
     return 0;
 };

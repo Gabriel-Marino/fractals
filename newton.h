@@ -15,4 +15,4 @@
 //  Size of the visualization grid of area N*N;
 #define N 1000
 //  How close the guessed root given the point used as guest must be to the real root of the equation, Tol is for Tolerance;
-#define Tol 0.0001
+#define Tol 0.00000001
