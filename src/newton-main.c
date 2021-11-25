@@ -1,10 +1,10 @@
 /**
  * Created when     :   2021.10.21;
- * Last Update      :   2021.11.23;
+ * Last Update      :   2021.11.25;
  * Author           :   G. Marino <gcmarino404@gmail.com>;
  * Notes            :
  * Compilation      :   gcc -O3 src/newton-main.c -static -lgsl -lgslcblas -lm -o fractal.out
- * Execution        :   time ./fractal.out <coefficient of x> <coefficient of x square> <coefficient of x cubic> ... <coefficient of x in nth power>
+ * Execution        :   time ./fractal.out
  */
 
 #include "../newton.h"
@@ -16,7 +16,7 @@ struct cmplx {
 };
 
 //  Output (op) function, print the results into .dat archives;
-void op(int *phi) {
+void op(int *arr) {
     int i, j;
     FILE *file;
     char name[100];
@@ -25,108 +25,65 @@ void op(int *phi) {
     file = fopen(name, "w");
     for (i = 0; i < N; i++) {
         for (j = 0; j < N; j++) {
-            fprintf(file, "%d ", phi[i*N+j]);
+            fprintf(file, "%d ", arr[i*N+j]);
         };
         fprintf(file, "\n");
     };
     fclose(file);
 };
 
-//  roots = [1, -1, 0, i, -i];
-// double _Complex *roots[] = (1.0+0.0*I, -1.0+0.0*I, 0.0+0.0*I, 0.0+1.0*I, 0.0-1.0*I);
-// struct cmplx *roots[5] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, 0.0}, {0.0, 1.0}, {0.0, -1.0}};
-// double _Complex fun1 (double _Complex x) {return x*(x*x+1)*(x*x-1); };
-// double _Complex dfun1(double _Complex x) {return 5*x*x*x*x-1; };
+double _Complex find_root(double _Complex r0, double _Complex f(double _Complex x), double _Complex df(double _Complex x)) {
 
-//  I chose this specific function because it have golden ratio and plus or minus i as root; roots = [phi, 1-phi, 0, i, -i];
-//  double _Complex *roots[] = ((1.0+sqrt(5))/2.0+0.0*I, (1.0-sqrt(5))/2.0+0.0*I, 0.0+0.0*I, 0.0+1.0*I, 0.0-1.0*I);
-// double _Complex fun2 (double _Complex x) {return x*(x*x+1)*(x*x-x-1); };
-// double _Complex dfun2(double _Complex x) {return x*(x*x*(5*x-4)-2)-1; };
+    double _Complex r, rt = r0;
 
-//  Inspired by Grant Sanderson, Grant uses same generalization in one of he's code.
-double _Complex fun(double _Complex x, double *coefs) {
-    double _Complex y;
-    for (int i = 1; i <= sizeof(coefs); i++) {
-        y += coefs[i]*cpow(x, i);
-    };
-    return y;
-};
-
-//  Inspired by Grant Sanderson, Grant uses same generalization in one of he's code.
-double _Complex dfun(double _Complex x, double *coefs) {
-    double _Complex y;
-    for (int i = 1; i <= sizeof(coefs); i++) {
-        y += i*coefs[i]*cpow(x, i-1);
-    };
-    return y;
-};
-
-//  Inspired by Grant Sanderson, Grant uses same generalization in one of he's code.
-double _Complex find_root(double _Complex r0, double *coefs) {
-    double _Complex r = 1/Tol, rt = r0;
-    int i;
-
-    while ((cabs(r - rt) < Tol) || (i < 100)) {
-        r = rt - fun(rt, coefs)/dfun(rt, coefs);
-        rt = r;
-        i++;
+    for (int i = 0; i < root_iterations; i++) {
+        r = rt - f(rt)/df(rt);
+        r = rt;
     };
 
     return r;
 };
 
-int main(int argc, char **argv) {
+//  roots = [1, -1, 0, i, -i];
+double _Complex fun1 (double _Complex x) {return x*(x*x+1)*(x*x-1); };
+double _Complex dfun1(double _Complex x) {return 5*x*x*x*x-1; };
+struct cmplx roots1[5] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, 0.0}, {0.0, 1.0}, {0.0, -1.0}};
 
+//  I chose this specific function because it have golden ratio and plus or minus i as root; roots = [phi, 1-phi, 0, i, -i];
+double _Complex fun2 (double _Complex x) {return x*(x*x+1)*(x*x-x-1); };
+double _Complex dfun2(double _Complex x) {return x*(x*x*(5*x-4)-2)-1; };
+struct cmplx roots2[5] = {{phi, 0.0}, {1-phi, 0.0}, {0.0, 0.0}, {0.0, 1.0}, {0.0, -1.0}};
+
+void fractal(double _Complex func(double _Complex x), double _Complex dfunc(double _Complex x), struct cmplx *root_arr) {
+
+    struct cmplx *plane_2_root = calloc(N*N, sizeof(struct cmplx));
+    int x, y, i, *color = calloc(N*N, sizeof(int));
     double _Complex r, z;
-    int *color = calloc(N*N, sizeof(int));
-    double *coefs = calloc(argc, sizeof(double));
 
-    struct cmplx *roots = calloc(argc, sizeof(struct cmplx));
-
-    gsl_rng_default_seed = time(NULL);
-    gsl_rng *rng = gsl_rng_alloc(gsl_rng_taus);
-
-    for (int i = 1; i < argc; i++) {
-        coefs[i-1] = atof(argv[i]);
-    };
-    for (int i = 0; i < argc; i++) {
-        double _Complex r = 2.0*gsl_rng_uniform(rng)*(1.0+1.0*I);
-        double _Complex z = find_root(r, coefs);
-        roots[i].real = creal(z);
-        roots[i].imag = cimag(z);
+    for (x = 0; x < N; x++) {
+        for (y = 0; y < N; y++) {
+            r = find_root(x+y*I, func, dfunc);
+            plane_2_root[x*N+y].real = creal(r);
+            plane_2_root[x*N+y].imag = cimag(r);
+        };
     };
 
-    for (int i = 0; i < sizeof(roots); i++) {
-        printf("%e + %e\n", roots[i].real, roots[i].imag);
+    for (x = 0; x < N; x++) {
+        for (y = 0; y < N; y++) {
+            for (i = 0; i < sizeof(roots1); i++) {
+                if ((plane_2_root[x*N+y].real-root_arr[x*N+y].real) < Tol && (plane_2_root[x*N+y].imag-root_arr[x*N+y].imag) < Tol) {
+                    color[i] = i+1;
+                };
+            };
+        };
     };
-
-    // for (int x = 0; x < N; x++) {
-    //     for (int y = 0; y < N; y++) {
-    //         r = root_fun(1.0*x+1.0*y*I);                    //  Evaluate each point as an initial guess;
-    //         for (int i = 0; i < sizeof(roots); i++) {
-    //             z = r - roots[i];                           //  Evaluate how close the point after N iterations of each root of the function;
-    //             if (creal(z) < Tol && cimag(z) < Tol) {
-    //                 color[x*N+y] = i+1;                     //  Link the point to a given number which going to relate to a color;
-    //             };
-    //         };
-    //     };
-    // };
-
-    // for (int x = 0; x < N; x++) {
-    //     for (int y = 0; y < N; y++) {
-    //         r = root_fun(1.0*x+1.0*y*I);                                                            //  Evaluate each point as an initial guess;
-    //         for (int i = 0; i < sizeof(roots); i++) {
-    //             if (((creal(r) - roots[i].real) < Tol) && ((cimag(r) - roots[i].imag) < Tol)) {     //  Evaluate how close the point after N iterations of each root of the function;
-    //                 color[x*N+y] = i+1;                                                             //  Link the point to a given number which going to relate to a color;
-    //             };
-    //         };
-    //     };
-    // };
 
     op(color);
 
     free(color);
-    gsl_rng_free(rng);
+};
+
+int main(int argc, char **argv) {
 
     return 0;
 };

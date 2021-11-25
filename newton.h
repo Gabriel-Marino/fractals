@@ -1,6 +1,6 @@
 /**
  * Created when     :   2021.11.19;
- * Last Update      :   2021.11.21;
+ * Last Update      :   2021.11.25;
  * Author           :   G. Marino <gcmarino404@gmail.com>;
  * Notes            :   Header to the program Newton-main and correlated files.
  */
@@ -15,4 +15,6 @@
 //  Size of the visualization grid of area N*N;
 #define N 1000
 //  How close the guessed root given the point used as guest must be to the real root of the equation, Tol is for Tolerance;
-#define Tol 0.00000001
+#define Tol 1e-8
+#define root_iterations 1000
+#define phi (1+sqrt(5))/2
