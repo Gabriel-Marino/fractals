@@ -16,5 +16,5 @@
 #define N 1000
 //  How close the guessed root given the point used as guest must be to the real root of the equation, Tol is for Tolerance;
 #define Tol 1e-8
-#define root_iterations 1000
+#define root_iterations 1e3
 #define phi (1+sqrt(5))/2

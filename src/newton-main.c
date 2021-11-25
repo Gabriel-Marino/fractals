@@ -85,5 +85,7 @@ void fractal(double _Complex func(double _Complex x), double _Complex dfunc(doub
 
 int main(int argc, char **argv) {
 
+    fractal(fun1, dfun1, roots1);
+
     return 0;
 };
